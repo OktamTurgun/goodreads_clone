@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    bio = models.TextField()
-    email = models.EmailField(unique=True)
+    bio = models.TextField(blank=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -30,10 +30,27 @@ class BookAuthor(models.Model):
     class Meta:
         unique_together = ("book", "author")
 
+class UserBook(models.Model):
+    STATUS_CHOICES = [
+        ('want_to_read', 'Want to read'),
+        ('reading', 'Currnetly reading'),
+        ('read', 'Read'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.title} ({self.status})"
+
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
 
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
@@ -43,3 +60,6 @@ class Review(models.Model):
 
     class Meta:
         unique_together = ("user", "book")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.title} ({self.rating})"
