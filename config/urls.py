@@ -6,5 +6,6 @@ urlpatterns = [
     path('', landing_page, name='landing_page'),
 
     path('admin/', admin.site.urls),
-    path('auth/', include('accounts.urls'))
+    path('auth/', include('accounts.urls')),
+    # path('books/', include('books.urls')),
 ]
