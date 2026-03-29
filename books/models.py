@@ -30,11 +30,12 @@ class BookAuthor(models.Model):
     class Meta:
         unique_together = ("book", "author")
 
+
 class UserBook(models.Model):
     STATUS_CHOICES = [
-        ('want_to_read', 'Want to read'),
-        ('reading', 'Currnetly reading'),
-        ('read', 'Read'),
+        ("want_to_read", "Want to read"),
+        ("reading", "Currnetly reading"),
+        ("read", "Read"),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
@@ -42,7 +43,7 @@ class UserBook(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'book')
+        unique_together = ("user", "book")
 
     def __str__(self):
         return f"{self.user.username} - {self.book.title} ({self.status})"
@@ -50,7 +51,7 @@ class UserBook(models.Model):
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="reviews")
 
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
