@@ -84,3 +84,55 @@ class RegisterViewTest(TestCase):
 
     self.assertEqual(response.status_code, 200)
     self.assertEqual(User.objects.filter(username='testuser').count(), 1)
+
+
+class LoginViewTest(TestCase):
+  
+  def setUp(self):
+    self.url = reverse('accounts:login')
+
+    self.user = User.objects.create_user(
+      username = 'testuser',
+      password = 'password123!'
+    )
+
+  def test_login_page_loads(self):
+    response = self.client.get(self.url)
+
+    self.assertEqual(response.status_code, 200)
+    self.assertTemplateUsed(response, 'accounts/login.html')
+
+  def test_login_success(self):
+    response = self.client.post(self.url, {
+      'username': 'testuser',
+      'password': 'password123!'
+    })
+
+    self.assertRedirects(response, reverse('landing_page'))
+
+  def test_login_auto_session(self):
+    self.client.post(self.url, {
+      'username': 'testuser',
+      'password': 'password123!'
+    })
+
+    self.assertTrue('_auth_user_id' in self.client.session)
+
+  def test_login_wrong_password(self):
+    response = self.client.post(self.url, {
+      'username': 'testuser',
+      'password': 'wrongPass123!'
+    })
+
+    self.assertEqual(response.status_code, 200)
+    self.assertFalse('_auth_user_id' in self.client.session)
+
+  def test_login_wrong_username(self):
+    response = self.client.post(self.url, {
+      'username': 'wrongname',
+      'password': 'password123!'
+    })
+
+    self.assertEqual(response.status_code, 200)
+    self.assertFalse('_auth_user_id' in self.client.session)
+    
