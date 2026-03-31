@@ -135,4 +135,57 @@ class LoginViewTest(TestCase):
 
     self.assertEqual(response.status_code, 200)
     self.assertFalse('_auth_user_id' in self.client.session)
-    
+
+class LogoutViewTest(TestCase):
+  def setUp(self):
+    self.url = reverse('accounts:logout')
+    self.user = User.objects.create_user(
+      username = 'testuser',
+      password = 'password123!'
+    ) 
+
+  def test_logout_redirect(self):
+    self.client.login(
+      username = 'testuser',
+      password = 'password123!'
+    )
+
+    response = self.client.get(self.url)
+
+    self.assertRedirects(response, reverse('landing_page'))
+
+  def test_logout_clears_session(self):
+
+    self.client.login(username='testuser', password='password123!')
+    self.assertTrue('_auth_user_id' in self.client.session)
+    self.client.get(self.url)
+    self.assertFalse('_auth_user_id' in self.client.session)
+
+class ProfileViewTest(TestCase):
+  def setUp(self):
+    self.url = reverse('accounts:profile')
+    self.user = User.objects.create_user(
+      username = 'testuser',
+      password = 'password123!'
+    )
+
+  def test_profile_requires_login(self):
+    response = self.client.get(self.url)
+
+    self.assertEqual(response.status_code, 302)
+    self.assertRedirects(
+      response,
+      reverse('accounts:login') + '?next=/auth/profile/',
+      fetch_redirect_response=False
+    )
+
+  def test_profile_page_loads(self):
+    self.client.login(
+      username = 'testuser',
+      password = 'password123!'
+    )
+
+    response = self.client.get(self.url)
+
+    self.assertEqual(response.status_code, 200)
+    self.assertTemplateUsed(response, 'accounts/profile.html')
