@@ -1,4 +1,31 @@
-venv/
-*.sqlite3
+# Environment
+.env
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Django
+db.sqlite3
+*.log
+media/
+
+# IDE
 .vscode/
+.idea/
+```
+
+---
+
+## 6. Fayl strukturasi:
+```
+goodreads/
+├── .env              ← GitHub da YO'Q (yashirin)
+├── .env.example      ← GitHub da BOR (namuna)
+├── .gitignore        ← .env yashirilgan
+├── manage.py
+└── config/
+    └── settings.py   ← os.getenv() ishlatadi
