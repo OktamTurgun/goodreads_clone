@@ -85,6 +85,40 @@ class RegisterViewTest(TestCase):
     self.assertEqual(response.status_code, 200)
     self.assertEqual(User.objects.filter(username='testuser').count(), 1)
 
+  def test_register_invalid_password_error(self):
+    """Parollar mos kelmasa forma xato beradi"""
+    response = self.client.post(self.url, {
+      'username': 'testuser',
+      'email': 'testuser@example.com',
+      'password1': 'password123!',
+      'password2': 'wrongpass123!',
+    })
+
+    self.assertFormError(response.context['form'], 'password2', 'The two password fields didn’t match.')
+
+  def test_register_duplicate_username_error(self):
+    """Bir hil username bilan ro'yxatdan o'tib bo'lmaydi"""
+    User.objects.create_user(username='testuser', password='password123!')
+    response = self.client.post(self.url, {
+      'username': 'testuser',
+      'email': 'testuser@example.com',
+      'password1': 'password123!',
+      'password2': 'password123!',
+    })
+
+    self.assertFormError(response.context['form'], 'username', 'A user with that username already exists.')
+
+  def test_register_empty_username_error(self):
+    """Username bo'sh bo'lsa xato beradi"""
+    response = self.client.post(self.url, {
+      'username': '',
+      'email': 'testuser@example.com',
+      'password1': 'password123!',
+      'password2': 'password123!'
+    })
+
+    self.assertFormError(response.context['form'], 'username', 'This field is required.')
+
 
 class LoginViewTest(TestCase):
   
@@ -135,6 +169,33 @@ class LoginViewTest(TestCase):
 
     self.assertEqual(response.status_code, 200)
     self.assertFalse('_auth_user_id' in self.client.session)
+
+  def test_login_empty_username_error(self):
+    """Username bo'sh bo'lsa xato beradi"""
+    response = self.client.post(self.url, {
+      'username': '',
+      'password': 'password123!'
+    })
+
+    self.assertFormError(response.context['form'], 'username', 'This field is required.')
+
+  def test_login_empty_password_error(self):
+    """Password bo'sh bo'lsa xato beradi"""
+    response = self.client.post(self.url, {
+      'username': 'testuser',
+      'password': ''
+    })
+
+    self.assertFormError(response.context['form'], 'password', 'This field is required.')
+
+  def test_login_wrong_credentials_error(self):
+    """Noto'g'ri username yoki password xato beradi"""
+    response = self.client.post(self.url, {
+      'username': 'testuser',
+      'password': 'wrongpass123!'
+    })
+
+    self.assertFormError(response.context['form'], None, 'Username yoki parol noto\'g\'ri')
 
 class LogoutViewTest(TestCase):
   def setUp(self):
